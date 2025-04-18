@@ -4,21 +4,6 @@ const app = express()
 
 const PORT = process.env.PORT
 
-app.get('/api/jokes', (req, res) => {
-    const jokes = [
-        {
-            name: "mayank",
-        },
-        {
-            name: "ayush",
-        },
-        {
-            name: "kanika"
-        }
-    ]
-    res.send(jokes)
-})
-
 app.get('/', (req, res) => {
     res.send("hello world")
 })
