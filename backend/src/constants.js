@@ -1,1 +1,1 @@
-export const DB_Name = "fullstack"
+export const DB_NAME = "FullStack"
