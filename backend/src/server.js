@@ -1,60 +1,28 @@
-// Importing the Express app instance
-import { app } from './app.js';
+// ----------------------------- Load Environment Variables -----------------------------
+import dotenv from "dotenv";
+dotenv.config({ path: './env' }); // Make sure your .env file exists and has the correct keys
 
-// Importing the database connection function
-import { ConnectDB } from './db/index.js';
+// ----------------------------- Import App and DB Utilities -----------------------------
+import { app } from './app.js';         // Express app instance
+import { ConnectDB } from './db/index.js'; // Function to establish DB connection
 
-// Call ConnectDB, which returns a Promise
+// ----------------------------- Start Server after DB Connection -----------------------------
 ConnectDB()
     .then(() => {
-        console.log("✅ DB connected successfully");
+        console.log("✅ Database connected successfully");
 
-        // Handle DB connection errors using the app instance
+        // If the app encounters a runtime error, log and throw
         app.on('error', (error) => {
-            console.log('❌ Application is not able to talk to the database');
+            console.error('❌ App failed to communicate with the database');
             throw error;
         });
 
-
-        // Start the server after successful DB connection
-        app.listen(process.env.PORT, () => {
-            console.log(`🚀 Server running at Port: ${process.env.PORT}`);
+        // Start the Express server
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running at http://localhost:${PORT}`);
         });
     })
     .catch((error) => {
-        // Catch and log any DB connection errors
-        console.log("❌ Failed to connect to DB:", error);
+        console.error("❌ Failed to connect to the database:", error);
     });
-
-
-/*
-import express from 'express';
-import mongoose from 'mongoose'; // Make sure to import mongoose if you're using it
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-const DB_NAME = process.env.DB_NAME;
-
-// Using an IIFE to connect to the database and start the server
-;(async () => {
-    try {
-        // Connecting to the MongoDB database
-        await mongoose.connect(`${process.env.URL}/${DB_NAME}`);
-
-        // Handle DB connection errors using the app instance
-        app.on('error', (error) => {
-            console.log('❌ Application is not able to talk to the database');
-            throw error;
-        });
-
-        // Start the server after successful DB connection
-        app.listen(PORT, () => {
-            console.log(`🚀 Server listening at Port: ${PORT}`);
-        });
-
-    } catch (error) {
-        // Catch and log errors during DB connection or server startup
-        console.log("❌ Error during startup:", error);
-    }
-})();
-*/

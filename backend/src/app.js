@@ -1,45 +1,46 @@
-// Import required modules
+// --------------------------- Import Required Modules ---------------------------
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-// Create an instance of the Express app
+// --------------------------- Initialize Express App ---------------------------
 const app = express();
 
 // ---------------------------- CORS Middleware ----------------------------
-// CORS (Cross-Origin Resource Sharing) allows your frontend to communicate with the backend.
-// For security reasons, browsers block requests between different origins unless CORS is enabled.
-
-// Configure CORS middleware
+// Enables CORS to allow cross-origin requests (e.g., frontend <-> backend communication)
 app.use(cors({
-    origin: process.env.CORS_Origin, // Allow requests from this origin (defined in your environment variables)
-    credentials: true // Allow cookies and credentials to be sent with the request
+    origin: process.env.CORS_Origin, // Define allowed origin via environment variable
+    credentials: true                // Allow cookies and credentials to be included in requests
 }));
 
 // ---------------------- Middleware to Parse JSON ----------------------
-// Parses incoming requests with JSON payloads.
-// 'limit' controls the max size of the JSON body to avoid overload or attacks.
+// Parses incoming JSON requests. Limit set to prevent DoS via large payloads
 app.use(express.json({
-    limit: "16kb", // Accept JSON bodies up to 16 kilobytes
+    limit: "16kb"
 }));
 
-// --------------------- Middleware for URL Encoded Data ---------------------
-// Parses incoming requests with URL-encoded payloads (e.g., form submissions)
-// 'extended: true' allows rich objects and arrays to be encoded into the URL-encoded format.
+// --------------------- Middleware for URL-Encoded Data ---------------------
+// Parses form submissions or other URL-encoded payloads
 app.use(express.urlencoded({
     extended: true,
-    limit: "16kb" // Limit size to 16 kilobytes
+    limit: "16kb"
 }));
 
 // ---------------------- Serve Static Files ----------------------
-// Serve files (like images, CSS, JS) from the 'public' directory
-// Accessible via URL like: http://yourdomain.com/image.png
+// Expose the "public" directory to serve static files like images or styles
 app.use(express.static("public"));
 
 // ---------------------- Cookie Parser Middleware ----------------------
-// Parses cookies attached to the client request object.
-// Helpful for managing user sessions, authentication tokens, etc.
+// Parses cookies sent by the client (useful for sessions and auth)
 app.use(cookieParser());
 
-// Export the app instance to be used in the main server file (e.g., index.js or server.js)
+// ---------------------- Import and Use Routes ----------------------
+import userRouter from "./routes/user.routes.js";
+
+// Register user-related API routes under the given base path
+app.use("/api/v1/users", userRouter);
+// Example endpoint: POST https://localhost:4000/api/v1/users/register
+
+// ---------------------- Export App Instance ----------------------
+// The exported app can be used in a server file like `index.js` or `server.js`
 export { app };
