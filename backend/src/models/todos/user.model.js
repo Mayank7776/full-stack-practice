@@ -1,96 +1,98 @@
-// Import mongoose and Schema from mongoose for database operations
+// Import mongoose and Schema from mongoose for defining and interacting with MongoDB schemas
 import mongoose, { Schema } from 'mongoose';
-// Import JWT for token generation (not used in this snippet)
+
+// Import JWT for token generation (used in access and refresh token methods)
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
-// Import bcrypt for password hashing
+
+// Import bcrypt for hashing passwords
 import bcrypt from "bcrypt"
 
-// Define the user schema with various fields
+// Define the user schema with various fields and validation rules
 const userSchema = new mongoose.Schema({
 
-   // Username field with several constraints and formatting options
+   // Username field: must be unique, lowercase, trimmed, and indexed
    userName: {
-      type: String,         // Value must be a string
-      unique: true,         // Username must be unique
-      required: true,       // Field is mandatory
-      lowercase: true,      // Convert input to lowercase
-      trim: true,           // Remove leading/trailing spaces
-      index: true           // Indexed for faster search
+      type: String,
+      unique: true,
+      required: true,
+      lowercase: true,
+      trim: true,
+      index: true
    },
 
-   // Email field with similar constraints as username
+   // Email field: must be unique, lowercase, trimmed, and required
    email: {
       type: String,
-      unique: true,         // Email must be unique
-      required: true,       // Mandatory field
+      unique: true,
+      required: true,
       lowercase: true,
       trim: true
    },
 
-   // Full name of the user
+   // Full name: required, trimmed, and indexed for search
    fullName: {
       type: String,
-      required: true,       // Cannot be empty
+      required: true,
       trim: true,
-      index: true           // Useful for searching/filtering
+      index: true
    },
 
-   // Avatar URL (e.g., profile picture)
+   // Avatar image URL: required
    Avatar: {
       type: String,
       required: true
    },
 
-   // Optional cover image (e.g., profile banner)
+   // Optional cover image URL
    coverImage: {
       type: String
    },
 
-   // Array of ObjectIds referencing videos the user has watched
+   // Watch history: array of ObjectIds referencing the "video" model
    watchHistory: [
       {
-         type: Schema.Types.ObjectId, // Link to another document
-         ref: "video"                // Reference to the "video" model
+         type: Schema.Types.ObjectId,
+         ref: "video"
       }
    ],
 
-   // Hashed password (will be hashed before saving)
+   // Password: required and will be hashed before saving
    password: {
       type: String,
-      required: [true, "password is required"] // Custom error message if not provided
+      required: [true, "password is required"]
    },
 
-   // Optional refresh token for handling JWT sessions
+   // Optional refresh token for managing session authentication
    refreshToken: {
       type: String
    }
 
 }, {
-   timestamps: true // Automatically adds `createdAt` and `updatedAt` timestamps
+   // Automatically adds `createdAt` and `updatedAt` fields
+   timestamps: true
 });
 
 
-// Middleware to hash password before saving the user document
+// Pre-save middleware to hash the password if it has been modified
 userSchema.pre("save", async function (next) {
-   // Check if password field was modified
-   if (this.isModiefied("password")) {
+   // Only hash the password if it has been modified (corrected typo from isModiefied to isModified)
+   if (this.isModified("password")) {
       // Hash the password using bcrypt with a salt round of 8
-      this.password = bcrypt.hash(this.password, 8)
-      next(); // Continue to the next step
-   } else {
-      next(); // If not modified, skip hashing
+      this.password = await bcrypt.hash(this.password, 8);
    }
+   next(); // Proceed to the next middleware or save
 });
 
 
-// Custom method to compare plain text password with hashed password
+// Instance method to compare entered password with stored hashed password
 userSchema.methods.isPasswordCorrect = async function(password) {
-   // bcrypt.compare returns true if passwords match
-   return await bcrypt.compare(password, this.password)
+   return await bcrypt.compare(password, this.password);
 }
 
+
+// Instance method to generate an access token using JWT
 userSchema.methods.generateAccessToken = function(){
-   jwt.sign(
+   return jwt.sign(
       {
          _id : this._id,
          email: this.email,
@@ -101,10 +103,12 @@ userSchema.methods.generateAccessToken = function(){
       {
          expiresIn: process.env.ACCESS_TOKEN_EXPIRY
       }
-   )
+   );
 }
+
+// Instance method to generate a refresh token using JWT
 userSchema.methods.generateRefreshToken = function(){
-   jwt.sign(
+   return jwt.sign(
       {
          _id : this._id,
       },
@@ -112,9 +116,9 @@ userSchema.methods.generateRefreshToken = function(){
       {
          expiresIn: process.env.REFRESH_TOKEN_EXPIRY
       }
-   )
+   );
 }
 
 
-// Export the User model so it can be used elsewhere in the project
+// Export the User model to use it in other parts of the application
 export const User = mongoose.model("User", userSchema);
