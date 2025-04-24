@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
    },
 
    // Avatar image URL: required
-   Avatar: {
+   avatar: {
       type: String,
       required: true
    },
