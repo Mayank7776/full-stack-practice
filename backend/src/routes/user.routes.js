@@ -8,7 +8,7 @@ import { registerUser, loginUser } from "../controllers/user.controller.js";
 const userRouter = Router();
 
 // Define POST route for user registration
-userRouter.route("/register").post(registerUser);
+userRouter.post("/register", registerUser)
 
 // Define POST route for user login
 userRouter.route("/login").post(loginUser);

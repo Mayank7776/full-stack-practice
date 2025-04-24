@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // Controller to handle user registration
 const registerUser = asyncHandler(async (req, res) => {
+    console.log("register route hit")
     // Placeholder response for registration
     res.status(200).json({
         message: "User registered successfully"
