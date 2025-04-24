@@ -2,7 +2,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 // Import JWT for token generation (used in access and refresh token methods)
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 // Import bcrypt for hashing passwords
 import bcrypt from "bcrypt"

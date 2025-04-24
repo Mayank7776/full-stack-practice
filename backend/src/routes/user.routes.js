@@ -4,11 +4,13 @@ import { Router } from "express";
 // Import controller functions for registration and login
 import { registerUser, loginUser } from "../controllers/user.controller.js";
 
+import { upload } from "../middlewares/multer.middleware.js";
+
 // Create a new router instance for user-related routes
 const userRouter = Router();
 
 // Define POST route for user registration
-userRouter.post("/register", registerUser)
+userRouter.post("/register", upload.fields([{ name: "avatar", maxCount: 1 }, { name: "coverImage", maxCount: 1 }]) , registerUser)
 
 // Define POST route for user login
 userRouter.route("/login").post(loginUser);
