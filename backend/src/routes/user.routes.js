@@ -1,19 +1,29 @@
-// Import Router from Express to define routes
+// Import necessary modules
 import { Router } from "express";
+import { upload } from "../middlewares/multer.middleware.js"; // For handling file uploads
+import { registerUser, loginUser, logoutUser } from "../controllers/user.controller.js"; // User controllers
+import { verifyJwt } from "../middlewares/auth.middleware.js"; // JWT authentication middleware
 
-// Import controller functions for registration and login
-import { registerUser, loginUser } from "../controllers/user.controller.js";
-
-import { upload } from "../middlewares/multer.middleware.js";
-
-// Create a new router instance for user-related routes
+// Initialize the router
 const userRouter = Router();
 
-// Define POST route for user registration
-userRouter.post("/register", upload.fields([{ name: "avatar", maxCount: 1 }, { name: "coverImage", maxCount: 1 }]) , registerUser)
+// Route to register a new user
+// Uploads avatar and optional cover image using multer
+userRouter.post(
+    "/register",
+    upload.fields([
+        { name: "avatar", maxCount: 1 },
+        { name: "coverImage", maxCount: 1 }
+    ]),
+    registerUser
+);
 
-// Define POST route for user login
+// Route to login a user
 userRouter.route("/login").post(loginUser);
 
-// Export the router (corrected to export directly instead of as an object)
+// Secured route: Logout user
+// verifyJwt middleware ensures only authenticated users can logout
+userRouter.post("/logout", verifyJwt, logoutUser);
+
+// Export the router
 export default userRouter;
